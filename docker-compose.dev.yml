@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  nestapp:
+    container_name: nestapp_dev
+    build:
+      target: development
+    environment:
+      - DB_TYPE=postgres
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_DB=postgres
+      - PG_PORT=5432
+      - PG_HOST=db
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  db:
+    container_name: db_local
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - '5432:5432'

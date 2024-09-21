@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  nestapp:
+    container_name: nestapp_prod
+    build:
+      target: production
+    image: jungmini0601/nest-auth-example:1.0.0
+    environment:
+      - DB_TYPE=postgres
+      - PG_USER=${PROD_DB_USER}
+      - PG_PASSWORD=${PROD_DB_PASSWORD}
+      - PG_DB=${PROD_DB_NAME}
+      - PG_PORT=5432
+      - PG_HOST=db
+
+  db:
+    container_name: db_prod
+    environment:
+      POSTGRES_USER: ${PROD_DB_USER}
+      POSTGRES_PASSWORD: ${PROD_DB_PASSWORD}
+      POSTGRES_DB: ${PROD_DB_NAME}
