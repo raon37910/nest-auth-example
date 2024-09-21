@@ -1,0 +1,35 @@
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm'
+import * as Joi from 'joi'
+
+export const DATABASE_CONFIGURATION = {
+  validationSchema: Joi.object({
+    DB_TYPE: Joi.string().required(),
+    PG_USER: Joi.string().required(),
+    PG_PASSWORD: Joi.string().required(),
+    PG_DB: Joi.string().required(),
+    PG_PORT: Joi.number().required(),
+    PG_HOST: Joi.string().required(),
+  }),
+}
+
+@Injectable()
+export class PostGresqlConfigProvider implements TypeOrmOptionsFactory {
+  constructor(private configService: ConfigService) {}
+
+  createTypeOrmOptions(): TypeOrmModuleOptions {
+    return {
+      type: this.configService.get('DB_TYPE'),
+      username: this.configService.get('PG_USER'),
+      password: this.configService.get('PG_PASSWORD'),
+      database: this.configService.get('PG_DB'),
+      port: this.configService.get<number>('PG_PORT'),
+      host: this.configService.get('PG_HOST'),
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      autoLoadEntities: true,
+      synchronize: true,
+      logging: true,
+    } as any // TODO 수정 필요 타입 여기 왜 타입 에러가 생기는거지?
+  }
+}

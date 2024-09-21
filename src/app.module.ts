@@ -1,25 +1,26 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ConfigModule } from '@nestjs/config'
 
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { LoggerMiddleware } from './common/logger.middleware'
 import { UsersModule } from './users/users.module'
-import { TypeOrmModule } from '@nestjs/typeorm'
-import { ConfigModule } from '@nestjs/config'
+import {
+  DATABASE_CONFIGURATION,
+  PostGresqlConfigProvider,
+} from './common/configuration/db.configuration'
+
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    UsersModule,
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
-      host: process.env.PG_HOST,
-      port: parseInt(process.env.PG_PORT),
-      username: process.env.PG_USER,
-      password: process.env.PG_PASSWORD,
-      database: process.env.PG_DB,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
+      ...DATABASE_CONFIGURATION,
     }),
+    UsersModule,
+    // TODO 이 부분이 개선 되어야 함
+    TypeOrmModule.forRootAsync({ useClass: PostGresqlConfigProvider }),
   ],
   controllers: [AppController],
   providers: [AppService],

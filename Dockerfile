@@ -9,7 +9,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
 # 개발 환경
-FROM dependencies AS development
+FROM dependencies AS dev
 COPY . .
 CMD ["pnpm", "run", "start:dev"]
 
@@ -19,7 +19,7 @@ COPY . .
 RUN pnpm build
 
 # 프로덕션 환경
-FROM base AS production
+FROM base AS prod
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY package.json ./

@@ -3,17 +3,11 @@ services:
   nestapp:
     container_name: nestapp_dev
     build:
-      target: development
+      target: dev
     environment:
-      - DB_TYPE=postgres
-      - PG_USER=postgres
-      - PG_PASSWORD=postgres
-      - PG_DB=postgres
-      - PG_PORT=5432
-      - PG_HOST=db
+      - NODE_ENV=dev
     volumes:
       - .:/app
-      - /app/node_modules
 
   db:
     container_name: db_local
