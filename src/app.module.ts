@@ -6,21 +6,21 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { LoggerMiddleware } from './common/logger.middleware'
 import { UsersModule } from './users/users.module'
-import {
-  DATABASE_CONFIGURATION,
-  PostGresqlConfigProvider,
-} from './common/configuration/db.configuration'
+import { PostGresqlConfigProvider } from './common/configuration/db.configuration'
+import { AuthModule } from './auth/auth.module'
+import { CONFIGURATION } from './common/configuration/env.validation'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
-      ...DATABASE_CONFIGURATION,
+      validationSchema: CONFIGURATION,
     }),
     UsersModule,
     // TODO 이 부분이 개선 되어야 함
     TypeOrmModule.forRootAsync({ useClass: PostGresqlConfigProvider }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
