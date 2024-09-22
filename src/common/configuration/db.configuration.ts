@@ -1,18 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm'
-import * as Joi from 'joi'
-
-export const DATABASE_CONFIGURATION = {
-  validationSchema: Joi.object({
-    DB_TYPE: Joi.string().required(),
-    PG_USER: Joi.string().required(),
-    PG_PASSWORD: Joi.string().required(),
-    PG_DB: Joi.string().required(),
-    PG_PORT: Joi.number().required(),
-    PG_HOST: Joi.string().required(),
-  }),
-}
 
 @Injectable()
 export class PostGresqlConfigProvider implements TypeOrmOptionsFactory {
