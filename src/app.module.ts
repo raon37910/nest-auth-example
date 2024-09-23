@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config'
 
@@ -9,6 +14,7 @@ import { UsersModule } from './users/users.module'
 import { PostGresqlConfigProvider } from './common/configuration/db.configuration'
 import { AuthModule } from './auth/auth.module'
 import { CONFIGURATION } from './common/configuration/env.validation'
+import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware'
 
 @Module({
   imports: [
@@ -28,5 +34,18 @@ import { CONFIGURATION } from './common/configuration/env.validation'
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*')
+    consumer
+      .apply(BearerTokenMiddleware)
+      .exclude(
+        {
+          path: 'auth/login',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'auth/register',
+          method: RequestMethod.POST,
+        },
+      )
+      .forRoutes('*')
   }
 }
