@@ -4,7 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
 
-import { User } from 'src/users/user.entity'
+import { Role, User } from 'src/users/user.entity'
+import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(rawToken: string) {
@@ -42,6 +44,58 @@ export class AuthService {
         email,
       },
     })
+  }
+
+  async login(rawToken: string) {
+    const { email, password } = this.parseBasicToken(rawToken)
+
+    const user = await this.authenticate(email, password)
+
+    return {
+      refreshToken: await this.issueToken(user, true),
+      accessToken: await this.issueToken(user, false),
+    }
+  }
+
+  async authenticate(email: string, password: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    })
+
+    if (!user) {
+      throw new BadRequestException('잘못된 로그인 정보 입니다!')
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch) {
+      throw new BadRequestException('잘못된 로그인 정보 입니다!')
+    }
+
+    return user
+  }
+
+  async issueToken(user: { id: number; role: Role }, isRefreshToken: boolean) {
+    const refreshTokenSecret = this.configService.get<string>(
+      'REFRESH_TOKEN_SECRET',
+    )
+    const accessTokenSecret = this.configService.get<string>(
+      'ACCESS_TOKEN_SECRET',
+    )
+
+    return this.jwtService.signAsync(
+      {
+        sub: user.id,
+        role: user.role,
+        type: isRefreshToken ? 'refresh' : 'access',
+      },
+      {
+        secret: isRefreshToken ? refreshTokenSecret : accessTokenSecret,
+        expiresIn: isRefreshToken ? '24h' : 300,
+      },
+    )
   }
 
   parseBasicToken(rawToken: string) {

@@ -8,4 +8,6 @@ export const CONFIGURATION = Joi.object({
   PG_PORT: Joi.number().required(),
   PG_HOST: Joi.string().required(),
   HASH_ROUNDS: Joi.number().required(),
+  REFRESH_TOKEN_SECRET: Joi.string().required(),
+  ACCESS_TOKEN_SECRET: Joi.string().required(),
 })
